@@ -12,10 +12,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
 	@IBOutlet private weak var yesButton: UIButton!
 	@IBOutlet private weak var noButton: UIButton!
 	@IBOutlet private weak var counterLabel: UILabel!
-	
 	@IBOutlet private weak var imageView: UIImageView!
-	
+	@IBOutlet private var activityIndicator: UIActivityIndicatorView!
 	@IBOutlet private weak var textLabel: UILabel!
+	
 	
 	// MARK: - Private Properties
 	
@@ -32,10 +32,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
 		super.viewDidLoad()
 		statisticService = StatisticService()
 		imageView.layer.cornerRadius = 20
-		let questionFactory = QuestionFactory()
-		questionFactory.delegate = self
+		let questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
 		self.questionFactory = questionFactory
-		questionFactory.requestNextQuestion()
+		showLoadingIndicator()
+		questionFactory.loadData()
 	}
 	
 	//MARK: - ACTIONS
@@ -56,7 +56,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
 	}
 	
 	// MARK: - QuestionFactoryDelegate
+	func didLoadDataFromServer() {
+		activityIndicator.isHidden = true // скрываем индикатор загрузки
+		questionFactory?.requestNextQuestion()
+	}
+	
 	func didFailToLoadData(with error: Error) {
+		showNetworkError(message: error.localizedDescription)
 		let alertModel = AlertModel(
 			title: "Ошибка",
 			message: "Не удалось загрузить данные: \(error.localizedDescription)",
@@ -85,6 +91,30 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
 		yesButton?.isEnabled = isEnabled
 		noButton?.isEnabled = isEnabled
 	}
+	private func showLoadingIndicator() {
+		activityIndicator.isHidden = false
+		activityIndicator.startAnimating()
+	}
+	private func hideLoadingIndicator() {
+		activityIndicator.isHidden = true
+		activityIndicator.stopAnimating()
+	}
+	private func showNetworkError(message: String) {
+		hideLoadingIndicator()
+		
+		let model = AlertModel(title: "Ошибка",
+							   message: message,
+							   buttonText: "Попробовать еще раз") { [weak self] in
+			guard let self = self else { return }
+			
+			self.currentQuestionIndex = 0
+			self.correctAnswers = 0
+			
+			self.questionFactory?.requestNextQuestion()
+		}
+		
+		alertPresenter.show(in: self, model: model)
+	}
 	private func showAnswerResult(isCorrect: Bool) {
 		if isCorrect {
 			correctAnswers += 1
@@ -92,8 +122,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
 		
 		imageView.layer.masksToBounds = true
 		imageView.layer.borderWidth = 8
-		// Используйте ваши цвета, если они определены как UIColor.ypGreen/ypRed
-		imageView.layer.borderColor = isCorrect ? UIColor.green.cgColor : UIColor.red.cgColor
+
+		imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
 		imageView.layer.cornerRadius = 20
 		
 		DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
@@ -110,7 +140,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate  
 	
 	private func convert(model: QuizQuestion) -> QuizStepViewModel {
 		let questionStep = QuizStepViewModel(
-			image: UIImage(named: model.image) ?? UIImage(),
+			image: UIImage(data: model.image) ?? UIImage(),
 			question: model.text,
 			
 			questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
