@@ -16,14 +16,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
 	
 	// MARK: - Private Properties
 	
-	private let presenter = MovieQuizPresenter()
+	lazy var presenter = MovieQuizPresenter(viewController: self)
 	private var alertPresenter = AlertPresenter()
 	
 	// MARK: - View Lifecycle
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		configureUI()
-		presenter.configureServices()
 		presenter.loadData()
 		presenter.viewController = self
 	}

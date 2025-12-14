@@ -24,11 +24,15 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
 	var questionFactory: QuestionFactoryProtocol?
 	var statisticService: StatisticServiceProtocol?
 	
-	// MARK: - Configuration & Data Loading
-	func configureServices() {
-		statisticService = StatisticService()
-		questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+	// MARK: - Initialization
+	init(viewController: MovieQuizViewProtocol) {
+		self.viewController = viewController
+		self.statisticService = StatisticService()
+		// Инициализируем фабрику вопросов здесь же
+		self.questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
 	}
+	
+	// MARK: - Configuration & Data Loading
 	
 	func loadData() {
 		viewController?.showLoadingIndicator()
@@ -47,7 +51,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
 			message: "Не удалось загрузить данные: \(error.localizedDescription)",
 			buttonText: "Попробовать снова",
 			completion: { [weak self] in
-				self?.loadData()
+				self?.questionFactory?.loadData()
 			}
 		)
 		viewController?.showFinalResults(model: alertModel)
@@ -64,7 +68,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
 		}
 	}
 	
-	// MARK: - Action Handling (Логика обработки кнопок)
+	// MARK: - Action Handling
 	
 	func noButtonClicked() {
 		didAnswer(isYes: false)
@@ -88,6 +92,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
 		}
 		viewController?.highlightImageBorder(isCorrect: isCorrect)
 		
+		// Намеренная задержка в 1 секунду (можно уменьшить до 0.5)
 		DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
 			guard let self = self else { return }
 			
@@ -152,10 +157,10 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
 		let dateString = dateFormatter.string(from: bestGame.date)
 		
 		return """
- Ваш результат: \(correctAnswers)/\(questionsAmount)
- Количество сыгранных игр: \(statisticService.gamesCount)
- Рекорд: \(bestGame.correct)/\(bestGame.total) от \(dateString)
- Средняя точность: \(accuracy)%
- """
+   Ваш результат: \(correctAnswers)/\(questionsAmount)
+   Количество сыгранных игр: \(statisticService.gamesCount)
+   Рекорд: \(bestGame.correct)/\(bestGame.total) от \(dateString)
+   Средняя точность: \(accuracy)%
+   """
 	}
 }
