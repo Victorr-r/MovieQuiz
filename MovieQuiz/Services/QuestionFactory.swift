@@ -28,7 +28,7 @@ final class QuestionFactory: QuestionFactoryProtocol {
 	private var movies: [MostPopularMovie] = []
 	
 	func requestNextQuestion() {
-		guard !self.movies.isEmpty else { return }
+		guard !movies.isEmpty else { return }
 		
 		let index = (0..<self.movies.count).randomElement() ?? 0
 		let movie = self.movies[index]

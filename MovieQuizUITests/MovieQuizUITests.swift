@@ -23,27 +23,28 @@ final class MovieQuizUITests: XCTestCase {
 	
 	func testYesButton() {
 		sleep(3)
-		
 		let firstPoster = app.images["Poster"]
 		let firstPosterData = firstPoster.screenshot().pngRepresentation
 		
 		app.buttons["Yes"].tap()
+		
 		sleep(10)
 		
 		let secondPoster = app.images["Poster"]
 		let secondPosterData = secondPoster.screenshot().pngRepresentation
 		let indexLabel = app.staticTexts["Index"]
+		
 		XCTAssertNotEqual(firstPosterData, secondPosterData)
 		XCTAssertEqual(indexLabel.label, "2/10")
 	}
 	
 	func testNoButton() {
 		sleep(3)
-		
 		let firstPoster = app.images["Poster"]
 		let firstPosterData = firstPoster.screenshot().pngRepresentation
 		
 		app.buttons["No"].tap()
+		
 		sleep(10)
 		
 		let secondPoster = app.images["Poster"]
@@ -56,35 +57,35 @@ final class MovieQuizUITests: XCTestCase {
 	}
 	
 	func testGameFinish() {
-		sleep(3)
+		sleep(2)
 		for _ in 1...10 {
 			app.buttons["No"].tap()
-			sleep(10)
+			sleep(2)
 		}
 		
-		let alert = app.alerts["Game results"]
+		let alert = app.alerts["Этот раунд окончен!"]
 		
-		XCTAssertTrue(alert.exists)
-		XCTAssertTrue(alert.label == "Этот раунд окончен!")
-		XCTAssertTrue(alert.buttons.firstMatch.label == "Сыграть ещё раз")
+		XCTAssertTrue(alert.waitForExistence(timeout: 5))
+		XCTAssertEqual(alert.label, "Этот раунд окончен!")
+		XCTAssertEqual(alert.buttons.firstMatch.label, "Сыграть ещё раз")
 	}
 	
 	func testAlertDismiss() {
-		sleep(3)
+		sleep(2)
 		for _ in 1...10 {
 			app.buttons["No"].tap()
-			sleep(10)
+			sleep(2)
 		}
 		
-		let alert = app.alerts["Game results"]
-		alert.buttons.firstMatch.tap()
+		let alert = app.alerts["Этот раунд окончен!"]
+		XCTAssertTrue(alert.exists)
 		
-		sleep(3)
+		alert.buttons["Сыграть ещё раз"].tap()
+		
+		sleep(2)
 		
 		let indexLabel = app.staticTexts["Index"]
-		
 		XCTAssertFalse(alert.exists)
-		XCTAssertTrue(indexLabel.label == "1/10")
+		XCTAssertEqual(indexLabel.label, "1/10")
 	}
 }
-

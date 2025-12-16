@@ -20,7 +20,7 @@ struct ArithmeticOperations {
 		}
 	}
 	
-	class MovieQuizTests: XCTestCase {
+	final class MovieQuizTests: XCTestCase {
 		func testAddition() throws {
 			let arithmeticOperations = ArithmeticOperations()
 			let num1 = 1

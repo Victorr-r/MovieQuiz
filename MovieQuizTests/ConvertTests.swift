@@ -2,24 +2,12 @@ import XCTest
 @testable import MovieQuiz
 
 final class MovieQuizViewControllerMock: MovieQuizViewProtocol {
-	
-	func show(quiz step: QuizStepViewModel) {
-	}
-	
-	func setButtonsEnabled(_ isEnable: Bool){
-	}
-	
-	func highlightImageBorder(isCorrect: Bool) {
-	}
-	
-	func showLoadingIndicator() {
-	}
-	
-	func hideLoadingIndicator() {
-	}
-	
-	func showFinalResults(model: AlertModel) {
-	}
+	func show(quiz step: QuizStepViewModel) {}
+	func setButtonsEnabled(_ isEnable: Bool){}
+	func highlightImageBorder(isCorrect: Bool) {}
+	func showLoadingIndicator() {}
+	func hideLoadingIndicator() {}
+	func showFinalResults(model: AlertModel) {}
 }
 
 final class MovieQuizPresenterTests: XCTestCase {

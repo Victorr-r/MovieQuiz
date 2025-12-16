@@ -28,7 +28,6 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
 	init(viewController: MovieQuizViewProtocol) {
 		self.viewController = viewController
 		self.statisticService = StatisticService()
-		// Инициализируем фабрику вопросов здесь же
 		self.questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
 	}
 	
@@ -69,20 +68,15 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
 	}
 	
 	// MARK: - Action Handling
-	
-	func noButtonClicked() {
-		didAnswer(isYes: false)
-	}
-	
-	func yesButtonClicked() {
-		didAnswer(isYes: true)
-	}
-	
-	private func didAnswer(isYes: Bool) {
+
+	func buttonClicked(isYes: Bool) {
 		viewController?.setButtonsEnabled(false)
 		guard let currentQuestion = currentQuestion else { return }
-		showAnswerResult(isCorrect: isYes == currentQuestion.correctAnswer)
+		
+		let isCorrect = isYes == currentQuestion.correctAnswer
+		showAnswerResult(isCorrect: isCorrect)
 	}
+
 	
 	// MARK: - Helper Methods & Game Logic
 	
@@ -92,7 +86,6 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
 		}
 		viewController?.highlightImageBorder(isCorrect: isCorrect)
 		
-		// Намеренная задержка в 1 секунду (можно уменьшить до 0.5)
 		DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
 			guard let self = self else { return }
 			
@@ -104,8 +97,6 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
 			}
 		}
 	}
-	
-	// Методы управления состоянием игры
 	
 	private var isLastQuestion: Bool {
 		currentQuestionIndex == questionsAmount - 1
@@ -120,7 +111,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
 	}
 	
 	func convert(model: QuizQuestion) -> QuizStepViewModel {
-		return QuizStepViewModel(
+		QuizStepViewModel(
 			image: UIImage(data: model.image) ?? UIImage(),
 			question: model.text,
 			questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)"

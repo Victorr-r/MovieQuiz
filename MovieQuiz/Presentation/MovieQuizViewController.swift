@@ -30,12 +30,12 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
 	//MARK: - ACTIONS
 	@IBAction private func yesButtonClicked(_ sender: UIButton) {
 		setButtonsEnabled(false)
-		presenter.yesButtonClicked()
+		presenter.buttonClicked(isYes: true)
 	}
 	
 	@IBAction private func noButtonClicked(_ sender: UIButton) {
 		setButtonsEnabled(false)
-		presenter.noButtonClicked()
+		presenter.buttonClicked(isYes: false)
 	}
 	
 	
